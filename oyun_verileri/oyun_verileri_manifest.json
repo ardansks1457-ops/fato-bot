@@ -1,0 +1,19 @@
+{
+  "version": "V2.0",
+  "bank_size": 100000,
+  "randomized": true,
+  "cross_game_answer_sets_disjoint": true,
+  "games": {
+    "sayitahmin": 100000,
+    "sarkitahmin": 100000,
+    "adamasmaca": 100000,
+    "bayraktahmin": 100000,
+    "dortislem": 100000,
+    "kelimeanagram": 100000,
+    "kelimebulmaca": 100000
+  },
+  "removed_games": [
+    "tarihtebugun"
+  ],
+  "song_lyric_policy": "short paraphrase clues; not verbatim copyrighted lyrics"
+}
