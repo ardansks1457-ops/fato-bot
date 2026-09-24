@@ -1,0 +1,87 @@
+FATOŞ — YAPILACAK EKSİKLER / ANA LİSTE
+Güncelleme: 2026-09-14
+
+ÖNCELİK 0 — ADAPTIVE / OPERASYON
+1. Adaptive confidence CI/test doğrulamasını tamamla.
+2. Runtime adaptive gate canlı kullanıcı regression ile doğrula.
+3. Telemetry bounded/deterministic davranışını canlı runtime'da doğrula.
+4. Ana Railway production adaptive confidence davranışını doğrula.
+5. GitHub runner/Actions exact check-run blockerını sonuçlandır.
+6. Ana Railway polling servisinin tek instance olduğunu sürdürerek doğrula.
+7. Aynı BOT_TOKEN ile çalışan harici polling instance'ını tespit et.
+8. Learning-only polling disabled durumunu koru.
+9. Cross-process SQLite guard sonrası database is locked takibini uzun runtime penceresinde sürdür.
+10. Runner blocker çözülmeden gereksiz CI/prod commitleri üretme.
+
+ÖNCELİK 1 — ÖĞRENME DÖNGÜSÜ
+11. Gerçek Telegram feedback callback doğrulaması.
+12. Bounded hata sınıflandırmasını gerçek feedback ile doğrula.
+13. Positive feedback reinforcement sonucunu canlı doğrula.
+14. Aynı hatanın tekrarını azaltma ve tekrar kullanımını doğrula.
+15. Feedback → analiz → merkezi learning → tekrar kullanım döngüsünü kapat.
+16. Feedback ile confidence/öğrenme skorlarını bounded ilişkilendir.
+17. Negatif örnekleri güvenli ve geri alınabilir öğren.
+18. Tek merkezi learning pipeline'ı koru.
+19. Restart-safe idempotency tamamlandı; canlı callback doğrulaması açık.
+20. Feedback quality SQLite yazısı ortak DB guard'a alındı; canlı uzun süreli lock doğrulaması açık.
+
+ÖNCELİK 2 — BAĞLAM VE HAFIZA
+21. Uzun konuşma hafızası.
+22. Kullanıcıya özel öğrenme.
+23. Grup/özel sohbet ayrımı.
+24. Eski bağlam ile yeni konuyu daha güvenilir ayırma.
+25. Pending follow-up zincirini genişletme.
+26. Benzer geçmiş konuşma araması.
+27. Gereksiz eski bağlamı azaltma.
+28. Önemli bilgileri seçerek kalıcılaştırma.
+
+ÖNCELİK 3 — TÜRKÇE ZEKÂSI
+29. Eş/zıt anlam kapsamını genişlet.
+30. Ek/çekim çözümleme.
+31. Yazım hatası toleransı.
+32. Sokak dili/kısaltma/günlük Türkçe.
+33. Çok anlamlı kelime sense kapsamı.
+34. Cümle içi anlam ilişkileri.
+35. Kelime sırası/vurgu sinyalleri.
+36. Türkçe soru tipleri.
+37. Alay/şaka/sitem ayrımı.
+
+ÖNCELİK 4 — CEVAP KALİTESİ
+38. Aday üretimini genişlet.
+39. Intent + semantic + context + quality + confidence + diversity kalibrasyonunu geliştir.
+40. Düşük güvenli doğal fallback.
+41. Tekrar kalıplarını azalt.
+42. Kullanıcı üslubuna göre cevap uzunluğu.
+43. Gereksiz açıklamayı azalt.
+44. Konu değişiminde eski cevabı sürüklememe.
+
+ÖNCELİK 5 — ALTYAPI
+45. SQLite uzun runtime doğrulaması.
+46. Learning worker persistent storage.
+47. Merkezi migration/config.
+48. Monkey-patch azaltma.
+49. Runtime modüllerini sadeleştirme.
+50. usercustomize temizliği.
+51. runtime_guard / learning_gate sadeleştirme.
+52. Q&A pipeline ayrımını netleştirme.
+53. main.py refactor.
+54. Startup/import testleri.
+55. Tek güvenilir CI acceptance hattı.
+56. Railway health/crash recovery.
+57. DB backup/restore.
+58. Latency/performance profili.
+59. Worker recovery.
+
+OYUNLAR / DİĞER
+- Sayı tahmin ve bayrak tahmin çalışan sistemleri değiştirme.
+- Diğer planlı oyun/etkileşim geliştirmeleri mevcut sistemleri bozmadan yapılacak.
+
+KURALLAR
+- Veri kaybı kabul edilmez.
+- Regression olmadan özellik tamamlandı sayılmaz.
+- CI/Railway doğrulaması olmadan başarı ilan edilmez.
+- İkinci learning sistemi oluşturulmaz.
+- Learning-only polling yapmaz.
+- Aynı BOT_TOKEN tek polling instance olmalı.
+- Runner steps=[] / runner_id=0 kanıtı varken testler geçmiş varsayılmaz.
+- PR #9 kullanıcı açıkça istemeden merge edilmez.
