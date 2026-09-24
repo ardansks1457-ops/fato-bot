@@ -1,0 +1,28 @@
+name: Fatoş 90 Point Acceptance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: fatos-90point-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  conversation-90:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependency
+        run: python -m pip install --upgrade pip aiosqlite
+      - name: Run 90 point conversation test
+        run: python test_fatos_90point.py
