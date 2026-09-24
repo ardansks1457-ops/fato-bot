@@ -1,0 +1,28 @@
+name: Fatoş Six-Layer Learning CI
+
+on:
+  push:
+    branches:
+      - fatos-remote-lock-regression-20260915-patch
+  workflow_dispatch:
+
+jobs:
+  six-layer-learning:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependency
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Compile learning modules
+        run: python -m py_compile fatos_ogrenme_mantik.py fatos_learning_logic_adapter.py tests/test_fatos_learning_logic.py
+
+      - name: Run six-layer regression tests
+        run: python -m pytest -q tests/test_fatos_learning_logic.py

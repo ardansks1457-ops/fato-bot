@@ -1,0 +1,50 @@
+name: Fatos Turkish 10x Stress Test
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'test_fatos_turkce_10x.py'
+      - 'fatos_*.py'
+      - 'conversation_engine.py'
+      - '.github/workflows/fatos-10x-turkce-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      FATOS_LEARNING_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements.txt
+      - name: Run 10x Turkish stress tests
+        run: python test_fatos_turkce_10x.py > fatos_10x_turkce_report.json
+      - name: Validate DB safety and 10x coverage
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('fatos_10x_turkce_report.json',encoding='utf-8'))
+          assert p['db_write'] is False
+          assert p['queue_write'] is False
+          assert p['sentences_per_axis'] == 10
+          assert p['axes'] >= 15
+          assert p['total_sentences'] >= 150
+          assert len(p['words']) >= 10
+          print('PASS:', p['axes'], 'eksen x', p['sentences_per_axis'], 'cümle =', p['total_sentences'])
+          print('Özet:', p['summary'])
+          PY
+      - name: Upload full report
+        uses: actions/upload-artifact@v4
+        with:
+          name: fatos-10x-turkce-full-report
+          path: fatos_10x_turkce_report.json
+          retention-days: 30

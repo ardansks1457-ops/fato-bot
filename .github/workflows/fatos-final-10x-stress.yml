@@ -1,0 +1,52 @@
+name: Fatos Final 10x Stress Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_cevap_akli.py'
+      - 'fatos_cevap_saglam.py'
+      - 'fatos_duygu_akli.py'
+      - 'fatos_stil_filtresi.py'
+      - 'fatos_turkce_kok_akli.py'
+      - 'fatos_kelime_akli.py'
+      - 'fatos_cumle_akli.py'
+      - 'fatos_dialogue_action_engine.py'
+      - 'fatos_learning_gate.py'
+      - 'test_fatos_final_10x.py'
+      - 'fatos_final_test_runner.py'
+      - '.github/workflows/fatos-final-10x-stress.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements.txt
+      - name: Run final 10x stress test
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python fatos_final_test_runner.py > fatos_final_10x_report.json
+      - name: Validate safety and 10x coverage
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('fatos_final_10x_report.json',encoding='utf-8'))
+          print('total=',p['total'],'passed=',p['passed'],'develop=',p['develop'],'negative=',p['negative'],'verdict=',p['verdict'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fatos-final-10x-stress-report
+          path: fatos_final_10x_report.json

@@ -1,0 +1,83 @@
+name: Fatos Turkish Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fatos-turkish-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  turkish-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Compile Turkish modules and tests
+        run: |
+          python -m py_compile \
+            fatos_db_quality_evolution.py \
+            test_fatos_db_quality_evolution.py \
+            test_fatos_db_quality_duplicates.py \
+            fatos_turkish_quality_core.py \
+            fatos_turkish_quality_gate.py \
+            fatos_turkish_quality_pipeline.py \
+            fatos_turkish_context.py \
+            fatos_turkish_benchmark.py \
+            fatos_turkish_regression.py \
+            fatos_turkish_typo.py \
+            fatos_turkish_morphology.py \
+            fatos_turkish_semantics.py \
+            fatos_turkish_relations.py \
+            fatos_turkish_lexicon.py \
+            fatos_semantic_answer_ranker.py \
+            fatos_conversation_runtime.py \
+            test_fatos_turkish_semantics.py \
+            test_fatos_turkish_semantic_context.py \
+            test_fatos_turkish_morphology.py \
+            test_fatos_turkish_semantic_pair.py \
+            test_fatos_turkish_pair_guard.py \
+            test_fatos_turkish_semantic_morphology.py \
+            test_fatos_turkish_relations.py \
+            test_fatos_semantic_answer_ranker.py \
+            test_fatos_conversation_runtime.py
+      - name: Run DB quality evolution regression
+        run: python test_fatos_db_quality_evolution.py
+      - name: Run DB duplicate quality regression
+        run: python test_fatos_db_quality_duplicates.py
+      - name: Run Turkish benchmark
+        run: python fatos_turkish_benchmark.py
+      - name: Run Turkish semantic regression
+        run: python test_fatos_turkish_semantics.py
+      - name: Run Turkish semantic context regression
+        run: python test_fatos_turkish_semantic_context.py
+      - name: Run Turkish morphology regression
+        run: python test_fatos_turkish_morphology.py
+      - name: Run semantic morphology integration regression
+        run: python test_fatos_turkish_semantic_morphology.py
+      - name: Run lexical relations regression
+        run: python test_fatos_turkish_relations.py
+      - name: Run Turkish semantic pair regression
+        run: python test_fatos_turkish_semantic_pair.py
+      - name: Run Turkish question-answer pair regression
+        run: python test_fatos_turkish_pair_guard.py
+      - name: Run semantic answer ranking regression
+        run: python test_fatos_semantic_answer_ranker.py
+      - name: Run conversation runtime integration regression
+        run: python test_fatos_conversation_runtime.py
+      - name: Run Turkish chat regression
+        run: python fatos_turkish_regression.py

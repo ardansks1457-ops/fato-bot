@@ -1,0 +1,59 @@
+name: Fatoş Full Learning Test
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'test_fatos_learning_full.py'
+      - 'fatos_kelime_akli.py'
+      - 'fatos_cumle_akli.py'
+      - 'fatos_learning_pipeline.py'
+      - 'fatos_stil_filtresi.py'
+      - 'fatos_conversation_hardening.py'
+      - 'fatos_conversation_runtime.py'
+      - 'fatos_dialogue_action_engine.py'
+      - 'fatos_dialogue_action_overrides.py'
+      - 'fatos_emoji_akli.py'
+      - 'fatos_development_08.py'
+      - '.github/workflows/fatos-full-learning-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip aiosqlite aiohttp
+      - name: Run full learning test
+        run: python test_fatos_learning_full.py
+      - name: Commit TXT report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fatos_tam_ogrenme_test.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'test: persist full learning TXT report [skip ci]'
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            git fetch origin main
+            git rebase origin/main || true
+          done
+          echo 'Unable to push learning report after retries' >&2
+          exit 1
+      - name: Upload TXT report
+        uses: actions/upload-artifact@v4
+        with:
+          name: fatos-tam-ogrenme-test
+          path: fatos_tam_ogrenme_test.txt

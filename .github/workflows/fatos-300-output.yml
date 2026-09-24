@@ -1,0 +1,46 @@
+name: Fatoş 300 Dialogue Output
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: fatos-300-output-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+      - name: Generate full real dialogue report
+        run: python test_fatos_300_dialogues.py
+      - name: Commit readable TXT and Markdown reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fatos_300_dialogue_report.md fatos_300_dialogue_report.txt
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "test: persist full 300 dialogue output [skip ci]"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            git fetch origin main
+            git rebase origin/main || true
+          done
+          echo "Unable to push dialogue report after retries" >&2
+          exit 1
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: fatos-300-dialogue-report
+          path: |
+            fatos_300_dialogue_report.md
+            fatos_300_dialogue_report.txt

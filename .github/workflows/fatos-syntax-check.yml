@@ -1,0 +1,75 @@
+name: Fatoş Syntax Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fatos-syntax-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+
+      - name: Compile all Python files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import py_compile
+          import sys
+
+          excluded = {'.git', '.venv', 'venv', '__pycache__'}
+          failures = []
+          files = []
+          for path in Path('.').rglob('*.py'):
+              if any(part in excluded for part in path.parts):
+                  continue
+              files.append(path)
+              try:
+                  py_compile.compile(str(path), doraise=True)
+              except Exception as exc:
+                  failures.append((path, exc))
+          print(f'Compiled Python files: {len(files)}')
+          if failures:
+              for path, exc in failures:
+                  print(f'FAIL: {path}: {exc}')
+              sys.exit(1)
+          print('Python syntax check passed.')
+          PY
+
+      - name: Validate critical imports
+        env:
+          PYTHONPATH: .
+        run: |
+          python - <<'PY'
+          import importlib
+          modules = [
+              'conversation_engine',
+              'conversation_parts_runtime',
+              'fatos_welcome_fix',
+              'feature_pack',
+          ]
+          for name in modules:
+              importlib.import_module(name)
+              print(f'Imported: {name}')
+          print('Critical import smoke check passed.')
+          PY

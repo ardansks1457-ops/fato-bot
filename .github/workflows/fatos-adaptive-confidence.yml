@@ -1,0 +1,43 @@
+name: Fatoş Adaptive Confidence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_adaptive_confidence.py'
+      - 'test_fatos_adaptive_confidence.py'
+      - 'test_fatos_adaptive_runtime.py'
+      - 'test_fatos_response_telemetry.py'
+      - 'test_fatos_db_write_guard.py'
+      - 'fatos_conversation_runtime.py'
+      - 'fatos_response_telemetry.py'
+      - 'fatos_db_write_guard.py'
+      - '.github/workflows/fatos-adaptive-confidence.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fatos-adaptive-confidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  adaptive-confidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Runner reached
+        run: echo "FATOS_ADAPTIVE_CI_REACHED"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pytest
+        run: python -m pip install --upgrade pip pytest
+      - name: Run adaptive confidence and telemetry regression tests
+        run: python -m pytest -q test_fatos_adaptive_confidence.py test_fatos_adaptive_runtime.py test_fatos_response_telemetry.py test_fatos_db_write_guard.py

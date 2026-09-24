@@ -1,0 +1,25 @@
+name: FATOS DB Import Quality
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_import_quality_repair.py'
+      - 'test_fatos_import_quality_repair.py'
+      - 'fatos_db_quality_evolution.py'
+      - 'conversation_engine.py'
+      - '.github/workflows/fatos-db-import-quality.yml'
+  workflow_dispatch:
+
+jobs:
+  import-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile import quality repair
+        run: python -m py_compile fatos_import_quality_repair.py test_fatos_import_quality_repair.py
+      - name: Run import quality smoke tests
+        run: python test_fatos_import_quality_repair.py

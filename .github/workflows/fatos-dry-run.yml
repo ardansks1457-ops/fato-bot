@@ -1,0 +1,66 @@
+name: Fatos Learning Dry Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_kelime_akli.py'
+      - 'fatos_learning_gate.py'
+      - 'fatos_learning_pipeline.py'
+      - 'fatos_ogrenme_dry_run.py'
+      - 'fatos_stil_filtresi.py'
+      - '.github/workflows/fatos-dry-run.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run DB-free TDK test
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: |
+          python fatos_ogrenme_dry_run.py 'https://sozluk.gov.tr/gts?ara=kelime' > fatos_dry_run_report.json
+          python - <<'PY'
+          import json
+          p=json.load(open('fatos_dry_run_report.json', encoding='utf-8'))
+          assert p['dry_run'] is True
+          assert p['db_write'] is False
+          assert p['queue_write'] is False
+          assert p['samples'], 'No samples produced'
+          print(json.dumps({
+            'source': p['source'],
+            'extracted_count': p['extracted_count'],
+            'samples': [
+              {
+                'seed': x['seed'],
+                'meaning': x['meaning'],
+                'source_example': x['source_example'],
+                'question_count': x['question_count'],
+                'generated_answer_count': x['generated_answer_count'],
+                'intent_counts': x['intent_counts'],
+                'score_ge_95': x['score_ge_95'],
+                'top_results': x['top_results'][:12],
+              } for x in p['samples']
+            ]
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: fatos-dry-run-report
+          path: fatos_dry_run_report.json

@@ -1,0 +1,37 @@
+name: Fatoş Final Acceptance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_conversation_*.py'
+      - 'fatos_dialogue_*.py'
+      - 'fatos_stil_filtresi.py'
+      - 'conversation_engine.py'
+      - 'memory_manager.py'
+      - 'fatos_profanity_guard.py'
+      - 'test_fatos_final_acceptance.py'
+      - 'test_fatos_profanity_safety.py'
+      - '.github/workflows/fatos-final-acceptance.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip aiosqlite aiohttp
+      - name: Run profanity safety
+        run: python test_fatos_profanity_safety.py
+      - name: Run final acceptance
+        run: python test_fatos_final_acceptance.py

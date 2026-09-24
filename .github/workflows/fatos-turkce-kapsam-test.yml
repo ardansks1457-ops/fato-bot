@@ -1,0 +1,84 @@
+name: Fatos Turkish Coverage Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fatos_duygu_akli.py'
+      - 'fatos_turkce_kok_akli.py'
+      - 'fatos_kelime_akli.py'
+      - 'fatos_cumle_akli.py'
+      - 'fatos_turkish_*.py'
+      - 'test_fatos_turkce_kapsam.py'
+      - 'test_fatos_turkish_*.py'
+      - '.github/workflows/fatos-turkce-kapsam-test.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: fatos-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r requirements.txt
+      - name: Run 10-axis Turkish understanding tests
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkce_kapsam.py > fatos_turkce_kapsam_report.json
+      - name: Run Turkish benchmark
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python fatos_turkish_benchmark.py
+      - name: Run Turkish regression
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python fatos_turkish_regression.py
+      - name: Run unified Turkish quality pipeline smoke
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkish_quality_pipeline.py
+      - name: Run Turkish question-answer compatibility regression
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkish_pair_guard.py
+      - name: Run Turkish semantic polysemy regression
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkish_semantics.py
+      - name: Run Turkish semantic question-answer regression
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkish_semantic_pair.py
+      - name: Run Turkish morphology regression
+        env:
+          FATOS_LEARNING_ENABLED: '0'
+        run: python test_fatos_turkish_morphology.py
+      - name: Compile Turkish quality modules
+        run: python -m compileall -q fatos_turkish_*.py test_fatos_turkish_*.py
+      - name: Validate DB safety and coverage
+        run: |
+          python - <<'PY'
+          import json
+          p=json.load(open('fatos_turkce_kapsam_report.json',encoding='utf-8'))
+          assert p['db_write'] is False
+          assert p['queue_write'] is False
+          assert p['test_axes'] >= 10
+          assert p['case_count'] >= 15
+          assert len(p['words']) >= 6
+          assert p['sentence']['question_count'] > 0
+          print('PASS: 10+ Türkçe/anlama ekseni, DB yazımı kapalı.')
+          for w in p['words']:
+              print(w['word'], '->', w['morphology']['root'], 'sorular=', w['question_count'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fatos-turkce-kapsam-report
+          path: fatos_turkce_kapsam_report.json
