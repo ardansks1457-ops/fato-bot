@@ -1,0 +1,14 @@
+FATOŞ — LEARNING WRITE GUARD V1
+
+2026-09-15
+
+- fatos_learning_logic_adapter.py mevcut merkezi ContinuousTurkishLearner üzerine yeni bir write-guard katmanı eklenerek geliştirildi.
+- Mevcut _insert_candidates() işlemi fatos_db_write_guard.db_write ile sarılıyor.
+- Böylece learning candidate INSERT/UPDATE işlemleri aynı SQLite dosyası için mevcut process + processler-arası yazma koordinasyonundan geçiyor.
+- Alttaki SQL/transaction sahipliği değiştirilmedi; ikinci DB, worker veya persistence katmanı oluşturulmadı.
+- Adapter idempotent kaldı; guard ikinci kez kurulmadığı için wrapper zinciri oluşmuyor.
+- tests/test_fatos_learning_logic_adapter.py içine wrapper'ın tek kez kurulması, gerçek çağrının korunması ve .write.lock yaşam döngüsünü kontrol eden regression testi eklendi.
+- Bu değişiklik main.py'ye dokunmadı.
+- main.py known-good blob korunuyor: ab4c08342b82a6f6fa3c64fa30bcb07d05806ac8.
+- CI runner provisioning blocker nedeniyle bu yeni regression testinin GitHub Actions PASS sonucu henüz kanıtlanmış değildir.
+- Railway deploy ve PR #12 merge yapılmadı.

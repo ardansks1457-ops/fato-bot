@@ -1,0 +1,23 @@
+FATOŞ — TEK ÖĞRENME MOTORU REGRESSION KORUMASI
+
+Tarih: 2026-09-15
+Branch: fatos-remote-lock-regression-20260915-patch
+
+Yapılan:
+- tests/test_fatos_single_learning_engine_guard.py eklendi.
+- main.py içinde ContinuousTurkishLearner importunun tek olması korunuyor.
+- main.py içinde SUREKLI_OGRENME = ContinuousTurkishLearner(...) örneğinin tek olması korunuyor.
+- Runtime başlatma tarafında ortak SUREKLI_OGRENME / SUREKLI_OGRENME_TASK isimlerinin kullanıldığı statik olarak korunuyor.
+
+Amaç:
+- İkinci bir öğrenme motoru oluşturulmasını önlemek.
+- Mevcut SQLite/öğrenme mimarisini korumak.
+- Yeni bir learning system oluşturmadan mimari regresyonu erken yakalamak.
+
+Durum:
+- Test dosyası commit edildi.
+- Gerçek CI runner daha önce adım başlatmadan başarısız olduğu için testin CI PASS sonucu henüz doğrulanmış değildir.
+- main'e merge edilmedi.
+- Railway deploy edilmedi.
+- PR #9/#10/#11 merge edilmedi.
+- Sayı/tahmin ve flag sistemlerine dokunulmadı.
