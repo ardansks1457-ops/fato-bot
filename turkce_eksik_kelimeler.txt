@@ -1,0 +1,2 @@
+# Fatoş Türkçe Eksik Kelime Günlüğü v2
+# append-only: zaman	kelime	chat_id	user_id	ornek_cumle
